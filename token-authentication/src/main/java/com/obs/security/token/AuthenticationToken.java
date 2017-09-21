@@ -9,6 +9,7 @@ public class AuthenticationToken extends AbstractAuthenticationToken {
     private String token;
 
     public AuthenticationToken(String token) {
+        //noinspection unchecked
         super(Collections.EMPTY_LIST);
         super.setAuthenticated(true);
         this.token = token;

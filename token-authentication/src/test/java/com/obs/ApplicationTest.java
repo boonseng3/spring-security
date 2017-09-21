@@ -54,9 +54,7 @@ public class ApplicationTest {
 
     private final String defaultPassword = "P@ssw0rd";
 
-    private final String defaultLoginUrl = "/login";
-
-    private final String profileUrl = "/profile";
+    private final String defaultLoginUrl = "/api/login";
 
     @LocalServerPort
     private int serverPort;

@@ -1,8 +1,9 @@
 package com.obs.config;
 
+import com.obs.security.filter.LoginAuthenticationFilter;
+import com.obs.security.filter.TokenAuthenticationFilter;
 import com.obs.security.handler.UsernamePasswordAuthenticationFailureHandler;
 import com.obs.security.handler.UsernamePasswordAuthenticationSuccessHandler;
-import com.obs.security.filter.TokenAuthenticationFilter;
 import com.obs.security.provider.TokenAuthenticationProvider;
 import com.obs.security.service.TokenGenerationStrategy;
 import com.obs.security.service.UuidTokenGenerationStrategy;
@@ -19,7 +20,10 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import javax.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -27,8 +31,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private CustomUserServiceImpl userDetailsService;
-//    @Autowired
-//    private AuthenticationManager authenticationManager;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -37,25 +39,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/", "/home").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .formLogin()
-                .successHandler(usernamePasswordAuthenticationSuccessHandler())
-                .failureHandler(usernamePasswordAuthenticationFailureHandler())
-                .permitAll()
-                .and()
-                .logout()
-                .permitAll()
-                .and()
                 .anonymous().disable();
-        http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(loginAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(daoAuthenticationProvider())
                 .authenticationProvider(tokenAuthenticationProvider());
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) ->
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid credentials.");
     }
 
     @Bean
@@ -82,11 +82,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return filter;
     }
 
+
+    public LoginAuthenticationFilter loginAuthenticationFilter() throws Exception {
+        LoginAuthenticationFilter filter = new LoginAuthenticationFilter("/api/login");
+        filter.setAuthenticationManager(authenticationManagerBean());
+        filter.setAuthenticationSuccessHandler(usernamePasswordAuthenticationSuccessHandler());
+        filter.setAuthenticationFailureHandler(usernamePasswordAuthenticationFailureHandler());
+        return filter;
+    }
+
     @Bean
     public TokenAuthenticationProvider tokenAuthenticationProvider() {
         return new TokenAuthenticationProvider();
     }
-
 
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {

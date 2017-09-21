@@ -1,7 +1,7 @@
 package com.obs.security.provider;
 
-import com.obs.security.token.AuthenticationToken;
 import com.obs.security.service.EhCacheTokenService;
+import com.obs.security.token.AuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
