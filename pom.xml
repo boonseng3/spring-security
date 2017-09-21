@@ -11,6 +11,7 @@
         <module>basic-server</module>
         <module>basic-server-userdetails-db</module>
         <module>token-authentication</module>
+        <module>jwt-authentication</module>
     </modules>
     <packaging>pom</packaging>
 
