@@ -119,4 +119,12 @@ public class ApplicationTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(status().reason("Authentication Failed: Invalid token."));
     }
+
+    @Test
+    public void accessProtectedResourceNotCoveredByFilterWithoutToken() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get("/test"))
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(status().reason("Unauthorized"));
+    }
 }

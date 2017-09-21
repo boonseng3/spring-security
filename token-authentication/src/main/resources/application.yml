@@ -2,7 +2,7 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     platform: mysql
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/basic_server_userdetails?createDatabaseIfNotExist=true
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/token_authentication?createDatabaseIfNotExist=true
     initialize: false
     username: root
     password: P@ssw0rd

@@ -8,6 +8,8 @@ import com.obs.security.provider.TokenAuthenticationProvider;
 import com.obs.security.service.TokenGenerationStrategy;
 import com.obs.security.service.UuidTokenGenerationStrategy;
 import com.obs.service.CustomUserServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-
+    private static final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
     @Autowired
     private CustomUserServiceImpl userDetailsService;
 
@@ -43,7 +45,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .anonymous().disable();
         http.addFilterBefore(loginAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                // the default entry point will return 403, overrride to return some more appropriate
+                .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint())
+        ;
     }
 
     @Override
@@ -54,8 +59,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
-        return (request, response, authException) ->
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid credentials.");
+        return (request, response, authException) -> {
+            logger.debug("Authentication failure", authException);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+
+        };
     }
 
     @Bean
