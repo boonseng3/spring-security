@@ -11,7 +11,7 @@ import java.security.Key;
 import java.security.KeyStore;
 
 /**
- * Generate a token using UUID string.
+ * Generate a token using Jwt
  */
 public class JwtTokenGenerationStrategy implements TokenGenerationStrategy {
 

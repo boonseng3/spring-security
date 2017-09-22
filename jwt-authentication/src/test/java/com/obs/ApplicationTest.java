@@ -1,7 +1,7 @@
 package com.obs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.obs.security.filter.TokenAuthenticationFilter;
+import com.obs.security.filter.JwtAuthenticationFilter;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -134,20 +134,46 @@ public class ApplicationTest {
     }
 
     @Test
+    public void accessProtectedResourceWithValidToken() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.set(defaultUsernameParam, defaultUsername);
+        params.set(defaultPasswordParam, defaultPassword);
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.post(defaultLoginUrl)
+                .params(params)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andReturn();
+
+        String jws = result.getResponse().getContentAsString();
+
+        mvc.perform(MockMvcRequestBuilders.get("/api/v1/test").header(JwtAuthenticationFilter.HEADER_SECURITY_TOKEN, "Bearer " + jws))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"token\": \"test\"}"));
+
+        mvc.perform(MockMvcRequestBuilders.get("/test").header(JwtAuthenticationFilter.HEADER_SECURITY_TOKEN, "Bearer " + jws))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"token\": \"test\"}"));
+    }
+
+    @Test
     public void accessProtectedResourceWithoutToken() throws Exception {
         mvc.perform(MockMvcRequestBuilders.get("/api/v1/test"))
                 .andDo(print())
                 .andExpect(status().isUnauthorized())
-                .andExpect(status().reason("Authentication Failed: Token not present."));
+                .andExpect(status().reason("Unauthorized"));
     }
 
     @Test
     public void accessProtectedResourceWithInvalidToken() throws Exception {
         mvc.perform(MockMvcRequestBuilders.get("/api/v1/test")
-                .header(TokenAuthenticationFilter.HEADER_SECURITY_TOKEN, "abc-asas"))
+                .header(JwtAuthenticationFilter.HEADER_SECURITY_TOKEN, "Bearer asfdsadas.sadasd.adad"))
                 .andDo(print())
                 .andExpect(status().isUnauthorized())
-                .andExpect(status().reason("Authentication Failed: Invalid token."));
+                .andExpect(status().reason("Unauthorized"));
     }
 
     @Test

@@ -1,7 +1,7 @@
 package com.obs.config;
 
+import com.obs.security.filter.JwtAuthenticationFilter;
 import com.obs.security.filter.LoginAuthenticationFilter;
-import com.obs.security.filter.TokenAuthenticationFilter;
 import com.obs.security.handler.UsernamePasswordAuthenticationFailureHandler;
 import com.obs.security.handler.UsernamePasswordAuthenticationSuccessHandler;
 import com.obs.security.provider.TokenAuthenticationProvider;
@@ -97,8 +97,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
 
-    public TokenAuthenticationFilter tokenAuthenticationFilter() throws Exception {
-        TokenAuthenticationFilter filter = new TokenAuthenticationFilter("/api/**");
+    public JwtAuthenticationFilter tokenAuthenticationFilter() throws Exception {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter();
         filter.setAuthenticationManager(authenticationManagerBean());
         return filter;
     }

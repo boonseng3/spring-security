@@ -79,7 +79,7 @@ public class ApplicationTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andReturn();
 
         System.out.println("result.getResponse().getContentAsString() = " + result.getResponse().getContentAsString());
@@ -104,11 +104,37 @@ public class ApplicationTest {
     }
 
     @Test
+    public void accessProtectedResourceWithValidToken() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.set(defaultUsernameParam, defaultUsername);
+        params.set(defaultPasswordParam, defaultPassword);
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.post(defaultLoginUrl)
+                .params(params)
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andReturn();
+
+        String tokenStr = result.getResponse().getContentAsString();
+        AuthenticationSuccessResponse authToken = objectMapper.readValue(tokenStr, AuthenticationSuccessResponse.class);
+
+        mvc.perform(MockMvcRequestBuilders.get("/api/v1/test").header(TokenAuthenticationFilter.HEADER_SECURITY_TOKEN, authToken.getToken()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"token\": \"test\"}"));
+
+        mvc.perform(MockMvcRequestBuilders.get("/test").header(TokenAuthenticationFilter.HEADER_SECURITY_TOKEN,  authToken.getToken()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"token\": \"test\"}"));
+    }
+    @Test
     public void accessProtectedResourceWithoutToken() throws Exception {
          mvc.perform(MockMvcRequestBuilders.get("/api/v1/test"))
                 .andDo(print())
                 .andExpect(status().isUnauthorized())
-                .andExpect(status().reason("Authentication Failed: Token not present."));
+                .andExpect(status().reason("Unauthorized"));
     }
 
     @Test
@@ -117,7 +143,7 @@ public class ApplicationTest {
         .header(TokenAuthenticationFilter.HEADER_SECURITY_TOKEN, "abc-asas"))
                 .andDo(print())
                 .andExpect(status().isUnauthorized())
-                .andExpect(status().reason("Authentication Failed: Invalid token."));
+                .andExpect(status().reason("Unauthorized"));
     }
 
     @Test

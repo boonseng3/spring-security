@@ -85,7 +85,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     public TokenAuthenticationFilter tokenAuthenticationFilter() throws Exception {
-        TokenAuthenticationFilter filter = new TokenAuthenticationFilter("/api/**");
+        TokenAuthenticationFilter filter = new TokenAuthenticationFilter();
         filter.setAuthenticationManager(authenticationManagerBean());
         return filter;
     }

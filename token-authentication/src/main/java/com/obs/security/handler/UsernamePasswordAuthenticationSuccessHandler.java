@@ -29,6 +29,6 @@ public class UsernamePasswordAuthenticationSuccessHandler implements Authenticat
         response.getWriter()
                 .append(objectMapper.writeValueAsString(authenticationSuccessResponse));
         response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
     }
 }
