@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    platform: mysql
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/spring_security_acl?createDatabaseIfNotExist=true
+    initialize: false
+    username: root
+    password: P@ssw0rd
+    #driverClassName: com.mysql.jdbc.Driver
+    validation-query: SELECT * FROM users
+    hikari:
+      maximum-pool-size: 30
+      connection-timeout: 60000
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+      naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
+flyway:
+  enabled: true
+  locations: db
+  out-of-order: false
+  ignore-missing-migrations: false

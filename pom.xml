@@ -12,6 +12,7 @@
         <module>basic-server-userdetails-db</module>
         <module>token-authentication</module>
         <module>jwt-authentication</module>
+        <module>spring-security-acl</module>
     </modules>
     <packaging>pom</packaging>
 
